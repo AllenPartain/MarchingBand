@@ -5,8 +5,17 @@ const path = require("node:path");
 const assets = new Map([
   ["/", ["index.html", "text/html; charset=utf-8"]],
   ["/index.html", ["index.html", "text/html; charset=utf-8"]],
-  ["/app.js", ["app.js", "text/javascript; charset=utf-8"]],
-  ["/style.css", ["style.css", "text/css; charset=utf-8"]],
+  ["/css/style.css", ["css/style.css", "text/css; charset=utf-8"]],
+  ["/js/app.js", ["js/app.js", "text/javascript; charset=utf-8"]],
+  ["/js/attendance.js", ["js/attendance.js", "text/javascript; charset=utf-8"]],
+  ["/js/auth.js", ["js/auth.js", "text/javascript; charset=utf-8"]],
+  ["/js/chat.js", ["js/chat.js", "text/javascript; charset=utf-8"]],
+  ["/js/core.js", ["js/core.js", "text/javascript; charset=utf-8"]],
+  ["/js/goals.js", ["js/goals.js", "text/javascript; charset=utf-8"]],
+  ["/js/home.js", ["js/home.js", "text/javascript; charset=utf-8"]],
+  ["/js/passoffs.js", ["js/passoffs.js", "text/javascript; charset=utf-8"]],
+  ["/js/roster.js", ["js/roster.js", "text/javascript; charset=utf-8"]],
+  ["/sw.js", ["sw.js", "text/javascript; charset=utf-8"]],
 ]);
 
 http.createServer((request, response) => {

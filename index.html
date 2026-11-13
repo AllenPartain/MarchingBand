@@ -2,144 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1f3a">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0f1a">
   <title>Section Leader HQ</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div id="toast" class="toast hidden"></div>
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="row">
+        <h3 id="modalTitle" class="card-title"></h3>
+        <button class="icon-btn" id="modalClose" aria-label="Close">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
 
   <!-- LOGIN -->
   <section id="auth" class="screen hidden">
-    <div class="brand-hero">
-      <div class="logo">🎺</div>
+    <div class="hero">
+      <span class="mark" data-icon="chevrons" data-size="46"></span>
       <h1>Section Leader HQ</h1>
-      <p>Rehearsal accountability for your band</p>
+      <p>Rehearsal accountability for marching bands</p>
     </div>
-    <div class="card">
+    <div class="card form">
       <input id="email" type="email" placeholder="Email" autocomplete="email">
-      <input id="password" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
-      <button class="btn" id="loginBtn">Log in</button>
-      <button class="btn ghost" id="signupBtn">Sign up</button>
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="btn block" id="loginBtn">Log in</button>
+      <button class="btn secondary block" id="signupBtn">Create account</button>
     </div>
   </section>
 
   <!-- JOIN / CREATE BAND -->
   <section id="setup" class="screen hidden">
-    <div class="brand-hero">
-      <div class="logo">🥁</div>
+    <div class="hero">
+      <span class="mark" data-icon="chevrons" data-size="46"></span>
       <h1>Get started</h1>
       <p>Join your band or start a new one</p>
     </div>
-
-    <div class="card">
-      <h3>Join your band</h3>
+    <div class="card form">
+      <h3 class="card-title">Join your band</h3>
       <input id="joinCode" placeholder="Join code from your director">
       <input id="joinName" placeholder="Your full name">
       <select id="joinSection"></select>
       <input id="joinInstrument" placeholder="Instrument (e.g. Alto Sax)">
-      <button class="btn" id="joinBandBtn">Join band</button>
+      <button class="btn block" id="joinBandBtn">Join band</button>
     </div>
-
-    <div class="card">
-      <h3>Start a new band (directors)</h3>
+    <div class="card form">
+      <h3 class="card-title">Start a new band (directors)</h3>
       <input id="bandName" placeholder="Band name">
       <input id="myName" placeholder="Your full name">
-      <button class="btn gold" id="createBandBtn">Create band</button>
+      <button class="btn block" id="createBandBtn">Create band</button>
     </div>
-
-    <button class="btn ghost" id="setupLogoutBtn">Log out</button>
+    <button class="btn ghost block" id="setupLogoutBtn">Log out</button>
   </section>
 
-  <!-- MAIN APP -->
-  <section id="home" class="hidden">
+  <!-- APP -->
+  <div id="app" class="hidden">
     <header class="topbar">
-      <div class="who">
-        <div class="name" id="welcome"></div>
-        <span class="badge role" id="roleBadge"></span>
+      <div class="brand">
+        <span class="mark" data-icon="chevrons" data-size="24"></span>
+        <span>Section Leader HQ</span>
       </div>
-      <button class="btn ghost small" id="logoutBtn">Log out</button>
+      <div class="topbar-right">
+        <div class="me">
+          <div id="meName"></div>
+          <div id="meRole" class="sub"></div>
+        </div>
+        <button class="icon-btn" id="logoutBtn" data-icon="logout" aria-label="Log out"></button>
+      </div>
     </header>
 
-    <main class="content">
+    <div class="body">
+      <nav id="nav" class="nav"></nav>
 
-      <!-- GOALS -->
-      <div id="tab-goals" class="panel">
-        <h2 class="section-title">Rehearsal goals</h2>
+      <main id="main" class="main">
 
-        <details id="goalForm" class="card form-card hidden">
-          <summary>Assign a goal</summary>
-          <select id="goalSection"></select>
-          <textarea id="goalText" placeholder="e.g. Clean up mm. 40-48 at 120 bpm"></textarea>
-          <button class="btn" id="addGoalBtn">Assign goal</button>
-        </details>
+        <!-- HOME -->
+        <section id="tab-home" class="panel hidden">
+          <div class="page-head">
+            <div>
+              <p class="sub" id="homeDate"></p>
+              <h1 class="page-title" id="homeTitle">Home</h1>
+            </div>
+          </div>
+          <div id="homeNotify" class="card notify hidden">
+            <div>
+              <strong>Turn on notifications</strong>
+              <p class="sub">Get alerts for announcements and messages when the app is in the background.</p>
+            </div>
+            <button class="btn sm" id="enableNotifBtn">Enable</button>
+          </div>
+          <div id="homeBody"></div>
+        </section>
 
-        <div id="goalList"></div>
-      </div>
+        <!-- GOALS -->
+        <section id="tab-goals" class="panel hidden">
+          <div class="page-head">
+            <h1 class="page-title">Rehearsal Goals</h1>
+            <button class="btn sm hidden" id="newGoalBtn">+ New goal</button>
+          </div>
+          <div id="goalFilter" class="filters"></div>
+          <div id="goalList"></div>
+        </section>
 
-      <!-- PASS-OFFS -->
-      <div id="tab-passoffs" class="panel hidden">
-        <h2 class="section-title">Pass-off board</h2>
+        <!-- PASS-OFFS -->
+        <section id="tab-passoffs" class="panel hidden">
+          <div class="page-head">
+            <h1 class="page-title">Pass-offs</h1>
+            <button class="btn sm hidden" id="newItemBtn">+ New item</button>
+          </div>
+          <div class="filters"><select id="poSection" class="select-sm hidden"></select></div>
+          <div id="poList"></div>
+        </section>
 
-        <details id="itemForm" class="card form-card hidden">
-          <summary>Add a pass-off item</summary>
-          <input id="itemTitle" placeholder="Title (e.g. Opener, mm. 1-32)">
-          <input id="itemMovement" placeholder="Movement (e.g. Movement 1)">
-          <input id="itemMeasures" placeholder="Measures (e.g. 1-32)">
-          <input id="itemDue" type="date">
-          <button class="btn" id="addItemBtn">Add item</button>
-        </details>
-
-        <div id="passOffList"></div>
-      </div>
-
-      <!-- ATTENDANCE -->
-      <div id="tab-attendance" class="panel hidden">
-        <h2 class="section-title">Attendance</h2>
-        <div class="card">
-          <input id="attDate" type="date">
+        <!-- ATTENDANCE -->
+        <section id="tab-attendance" class="panel hidden">
+          <div class="page-head"><h1 class="page-title">Attendance</h1></div>
+          <div class="datebar">
+            <button class="icon-btn" id="attPrev" data-icon="chevL" aria-label="Previous day"></button>
+            <input type="date" id="attDate">
+            <button class="icon-btn" id="attNext" data-icon="chevR" aria-label="Next day"></button>
+            <button class="btn secondary sm" id="attToday">Today</button>
+          </div>
+          <div class="filters"><select id="attSection" class="select-sm hidden"></select></div>
           <div id="attSummary" class="chips"></div>
-        </div>
-        <div id="attList" class="card"></div>
-      </div>
+          <div id="attList" class="card list"></div>
+        </section>
 
-      <!-- ROSTER -->
-      <div id="tab-roster" class="panel hidden">
-        <h2 class="section-title">Roster</h2>
+        <!-- CHAT -->
+        <section id="tab-chat" class="panel hidden">
+          <div class="page-head">
+            <h1 class="page-title" id="chatTitle">Chat</h1>
+            <button class="icon-btn" id="muteBtn" data-icon="bell" aria-label="Mute channel"></button>
+          </div>
+          <div id="chanBar" class="chan-bar"></div>
+          <div class="msg-wrap">
+            <div id="msgScroll" class="msg-scroll"><div id="msgList" class="msg-list"></div></div>
+            <button id="jumpBtn" class="jump hidden">New messages ↓</button>
+          </div>
+          <p id="chatNote" class="sub hidden"></p>
+          <div id="composer" class="composer">
+            <textarea id="chatInput" rows="1" maxlength="1000" placeholder="Message"></textarea>
+            <button class="btn" id="sendBtn" data-icon="send" aria-label="Send"></button>
+          </div>
+        </section>
 
-        <div id="inviteBox" class="card hidden">
-          <p class="sub">Join code (give this to your members)</p>
-          <p id="joinCodeText" class="code">none yet</p>
-          <button class="btn ghost" id="newCodeBtn">Generate new code</button>
-        </div>
+        <!-- ROSTER -->
+        <section id="tab-roster" class="panel hidden">
+          <div class="page-head">
+            <h1 class="page-title">Roster</h1>
+            <span class="sub" id="rosterCount"></span>
+          </div>
+          <div id="inviteBox" class="card hidden">
+            <p class="sub">Join code (share it with your band)</p>
+            <div class="row">
+              <strong id="joinCodeText" class="code">—</strong>
+              <div class="btn-row">
+                <button class="btn secondary sm" id="copyCodeBtn">Copy</button>
+                <button class="btn secondary sm" id="newCodeBtn">New code</button>
+              </div>
+            </div>
+          </div>
+          <input id="rosterSearch" type="search" placeholder="Search members">
+          <div id="rosterList" class="card list"></div>
+        </section>
 
-        <div id="rosterList"></div>
-      </div>
-
-    </main>
-
-    <nav class="tabbar">
-      <button class="tab active" data-tab="goals"><span class="ico">🎯</span>Goals</button>
-      <button class="tab" data-tab="passoffs"><span class="ico">✅</span>Pass-offs</button>
-      <button class="tab" data-tab="attendance"><span class="ico">📋</span>Attendance</button>
-      <button class="tab" data-tab="roster" id="rosterTab"><span class="ico">👥</span>Roster</button>
-    </nav>
-  </section>
+      </main>
+    </div>
+  </div>
 
   <!-- Shows any crash on screen (safe to delete once everything is stable) -->
   <script>
-    window.addEventListener("error", function (e) {
+    function showCrash(msg) {
       var box = document.createElement("pre");
-      box.style.cssText =
-        "position:fixed;z-index:99;top:0;left:0;right:0;margin:0;padding:12px;" +
-        "background:#fff;color:#c00;white-space:pre-wrap;font-size:14px";
-      box.textContent = "ERROR: " + e.message + "\n" + (e.filename || "") + " line " + e.lineno;
+      box.style.cssText = "position:fixed;z-index:99;top:0;left:0;right:0;margin:0;padding:12px;background:#fff;color:#c00;white-space:pre-wrap;font-size:14px";
+      box.textContent = "ERROR: " + msg;
       document.body.appendChild(box);
-    });
+    }
+    window.addEventListener("error", function (e) { showCrash(e.message + " (" + (e.filename || "") + ":" + e.lineno + ")"); });
+    window.addEventListener("unhandledrejection", function (e) { showCrash(String(e.reason && e.reason.message || e.reason)); });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
