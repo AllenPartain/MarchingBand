@@ -11,63 +11,102 @@ const SECTIONS = [
 ];
 const ROLES = ["director", "drum_major", "section_leader", "member"];
 
+/* ---------- Small helpers ---------- */
+
+// Build an element safely (textContent, so nobody can inject HTML)
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function option(value, text) {
+  const o = document.createElement("option");
+  o.value = value;
+  o.textContent = text;
+  return o;
+}
+
 function fillSections(selectEl, withBlank) {
   selectEl.innerHTML = "";
-  if (withBlank) {
-    const blank = document.createElement("option");
-    blank.value = "";
-    blank.textContent = "No section";
-    selectEl.appendChild(blank);
-  }
-  SECTIONS.forEach((s) => {
-    const opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = s;
-    selectEl.appendChild(opt);
-  });
+  if (withBlank) selectEl.appendChild(option("", "No section"));
+  SECTIONS.forEach((s) => selectEl.appendChild(option(s, s)));
 }
 fillSections($("goalSection"), false);
 fillSections($("joinSection"), true);
 
-// Today's date as YYYY-MM-DD in the user's local time
 function today() {
-  return new Date().toLocaleDateString("en-CA");
+  return new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local time
 }
 $("attDate").value = today();
 $("attDate").onchange = () => loadAttendance();
+
+// Popup message: say("text") = error, say("text", "ok") = success, say("") = hide
+let toastTimer = null;
+function say(text, kind) {
+  const t = $("toast");
+  clearTimeout(toastTimer);
+  if (!text) {
+    t.classList.add("hidden");
+    return;
+  }
+  t.textContent = text;
+  t.className = "toast " + (kind || "error");
+  toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
+}
+
+// Catch errors from background loads so they show up instead of vanishing
+window.addEventListener("unhandledrejection", (e) => {
+  const r = e.reason;
+  say("Error: " + (r && r.message ? r.message : r));
+});
 
 function show(name) {
   ["auth", "setup", "home"].forEach((s) => $(s).classList.add("hidden"));
   $(name).classList.remove("hidden");
 }
 
-function say(text) {
-  $("message").textContent = text;
-  if (text) window.scrollTo(0, 0);
+function showTab(name) {
+  document.querySelectorAll(".panel").forEach((p) =>
+    p.classList.toggle("hidden", p.id !== "tab-" + name)
+  );
+  document.querySelectorAll(".tab").forEach((t) =>
+    t.classList.toggle("active", t.dataset.tab === name)
+  );
+  window.scrollTo(0, 0);
 }
+document.querySelectorAll(".tab").forEach((t) => {
+  t.onclick = () => showTab(t.dataset.tab);
+});
 
-async function refresh() {
+/* ---------- Startup: decide which screen to show ---------- */
+
+async function start() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) return show("auth");
 
-  const { data: profile } = await db
+  const { data: profile, error } = await db
     .from("users")
     .select("id, org_id, full_name, role, section")
     .eq("id", session.user.id)
     .maybeSingle();
 
+  if (error) throw error;
   if (!profile) return show("setup");
 
   me = profile;
-  $("welcome").textContent = `Welcome, ${me.full_name} (${me.role})`;
+  $("welcome").textContent = me.full_name;
+  $("roleBadge").textContent = me.role.replace("_", " ");
 
   const canAssign = ["director", "drum_major"].includes(me.role);
   $("goalForm").classList.toggle("hidden", !canAssign);
   $("itemForm").classList.toggle("hidden", me.role !== "director");
-  $("rosterBox").classList.toggle("hidden", me.role === "member");
+  $("rosterTab").classList.toggle("hidden", me.role === "member");
   $("inviteBox").classList.toggle("hidden", me.role !== "director");
 
   show("home");
+  showTab("goals");
   loadGoals();
   loadPassOffs();
   loadAttendance();
@@ -75,193 +114,15 @@ async function refresh() {
   if (me.role === "director") loadJoinCode();
 }
 
-/* ---------- ATTENDANCE ---------- */
-
-async function loadAttendance() {
-  const date = $("attDate").value || today();
-
-  const [rosterRes, logsRes] = await Promise.all([
-    db.from("users").select("id, full_name, section, role").order("full_name"),
-    db.from("attendance_logs").select("*").eq("date", date),
-  ]);
-
-  const list = $("attList");
-  list.innerHTML = "";
-
-  const err = rosterRes.error || logsRes.error;
-  if (err) return say(err.message);
-
-  const people = rosterRes.data.filter((u) =>
-    ["member", "section_leader"].includes(u.role)
-  );
-  if (people.length === 0) {
-    list.textContent = "No students to show.";
-    $("attSummary").textContent = "";
-    return;
+// If anything goes wrong, fall back to the login screen and show why
+async function refresh() {
+  try {
+    await start();
+  } catch (err) {
+    console.error(err);
+    show("auth");
+    say("Startup problem: " + (err.message || err));
   }
-
-  const logs = {};
-  logsRes.data.forEach((l) => (logs[l.student_id] = l));
-
-  const counts = { present: 0, absent: 0, tardy: 0 };
-  logsRes.data.forEach((l) => counts[l.status]++);
-  $("attSummary").textContent =
-    `Present ${counts.present} • Tardy ${counts.tardy} • Absent ${counts.absent}` +
-    ` • Not recorded ${people.length - logsRes.data.length}`;
-
-  const canMark = ["director", "section_leader"].includes(me.role);
-
-  people.forEach((p) => {
-    const log = logs[p.id];
-    const status = log ? log.status : "";
-
-    const row = document.createElement("div");
-    row.className = "student-row";
-
-    const nameEl = document.createElement("span");
-    nameEl.textContent = p.full_name + (p.section ? " (" + p.section + ")" : "");
-    row.appendChild(nameEl);
-
-    if (canMark) {
-      const sel = document.createElement("select");
-      [
-        ["", "Not recorded"],
-        ["present", "Present"],
-        ["tardy", "Tardy"],
-        ["absent", "Absent"],
-      ].forEach(([value, text]) => {
-        const opt = document.createElement("option");
-        opt.value = value;
-        opt.textContent = text;
-        if (value === status) opt.selected = true;
-        sel.appendChild(opt);
-      });
-      sel.onchange = () => setAttendance(p.id, date, sel.value);
-      row.appendChild(sel);
-    } else {
-      const st = document.createElement("span");
-      st.className = status;
-      st.textContent = status || "not recorded";
-      row.appendChild(st);
-    }
-
-    list.appendChild(row);
-  });
-}
-
-async function setAttendance(studentId, date, status) {
-  let error;
-
-  if (status === "") {
-    // "Not recorded" removes the record (directors only, per the rules)
-    ({ error } = await db
-      .from("attendance_logs")
-      .delete()
-      .eq("student_id", studentId)
-      .eq("date", date));
-  } else {
-    ({ error } = await db.from("attendance_logs").upsert(
-      {
-        org_id: me.org_id,
-        student_id: studentId,
-        date: date,
-        status: status,
-        recorded_by: me.id,
-      },
-      { onConflict: "student_id,date" }
-    ));
-  }
-
-  await loadAttendance();
-  if (error) say(error.message);
-  else say("");
-}
-
-/* ---------- ROSTER ---------- */
-
-async function loadJoinCode() {
-  const { data } = await db.from("join_codes").select("code").maybeSingle();
-  $("joinCodeText").textContent = data ? data.code : "none yet";
-}
-
-$("newCodeBtn").onclick = async () => {
-  const { data, error } = await db.rpc("new_join_code");
-  if (error) return say(error.message);
-  say("");
-  $("joinCodeText").textContent = data;
-};
-
-async function loadRoster() {
-  const { data, error } = await db
-    .from("users")
-    .select("id, full_name, role, section, instrument")
-    .order("full_name");
-
-  const list = $("rosterList");
-  list.innerHTML = "";
-  if (error) return say(error.message);
-
-  const isDirector = me.role === "director";
-
-  data.forEach((u) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const nameEl = document.createElement("p");
-    nameEl.innerHTML = "<strong></strong>";
-    nameEl.querySelector("strong").textContent = u.full_name;
-    card.appendChild(nameEl);
-
-    const info = document.createElement("p");
-    info.className = "small";
-    info.textContent = [u.role.replace("_", " "), u.section, u.instrument]
-      .filter(Boolean)
-      .join(" • ");
-    card.appendChild(info);
-
-    if (isDirector && u.id !== me.id) {
-      const roleSel = document.createElement("select");
-      ROLES.forEach((r) => {
-        const opt = document.createElement("option");
-        opt.value = r;
-        opt.textContent = r.replace("_", " ");
-        if (r === u.role) opt.selected = true;
-        roleSel.appendChild(opt);
-      });
-
-      const secSel = document.createElement("select");
-      fillSections(secSel, true);
-      secSel.value = u.section || "";
-
-      const save = () =>
-        updateUser(u.id, {
-          role: roleSel.value,
-          section: secSel.value || null,
-        });
-      roleSel.onchange = save;
-      secSel.onchange = save;
-
-      card.appendChild(roleSel);
-      card.appendChild(secSel);
-    }
-
-    list.appendChild(card);
-  });
-}
-
-async function updateUser(id, changes) {
-  const { data, error } = await db
-    .from("users")
-    .update(changes)
-    .eq("id", id)
-    .select();
-
-  if (error) say(error.message);
-  else if (data.length === 0) say("You're not allowed to change that person.");
-  else say("");
-  loadRoster();
-  loadPassOffs();
-  loadAttendance();
 }
 
 /* ---------- GOALS ---------- */
@@ -274,53 +135,43 @@ async function loadGoals() {
 
   const list = $("goalList");
   list.innerHTML = "";
-
   if (error) return say(error.message);
   if (data.length === 0) {
-    list.textContent = "No goals yet.";
+    list.appendChild(el("div", "empty", "No goals yet."));
     return;
   }
 
   const canUpdate = ["director", "section_leader"].includes(me.role);
 
   data.forEach((g) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const title = document.createElement("p");
     const isDone = g.status === "done";
-    title.innerHTML = `<strong></strong> <span class="${isDone ? "done" : ""}"></span>`;
-    title.querySelector("strong").textContent = g.target_section;
-    title.querySelector("span").textContent = isDone ? "✅ Done" : "Open";
-    card.appendChild(title);
+    const card = el("div", "card" + (isDone ? " is-done" : ""));
 
-    const text = document.createElement("p");
-    text.textContent = g.goal_text;
-    card.appendChild(text);
+    const head = el("div", "row");
+    head.appendChild(el("span", "badge pill", g.target_section));
+    head.appendChild(el("span", "badge " + (isDone ? "done" : "open"), isDone ? "Done" : "Open"));
+    card.appendChild(head);
+
+    card.appendChild(el("p", "goal-text", g.goal_text));
+    card.appendChild(el("p", "sub", new Date(g.date + "T00:00:00").toLocaleDateString()));
 
     if (canUpdate) {
-      const notes = document.createElement("textarea");
+      const notes = el("textarea");
       notes.placeholder = "Sectional notes (e.g. Mellophones rushing m. 42)";
       notes.value = g.leader_notes || "";
       card.appendChild(notes);
 
-      const saveBtn = document.createElement("button");
-      saveBtn.textContent = "Save notes";
+      const btns = el("div", "btn-row");
+      const saveBtn = el("button", "btn ghost", "Save notes");
       saveBtn.onclick = () => updateGoal(g.id, { leader_notes: notes.value });
-      card.appendChild(saveBtn);
-
-      const doneBtn = document.createElement("button");
-      doneBtn.textContent = isDone ? "Reopen" : "Mark done";
+      const doneBtn = el("button", "btn", isDone ? "Reopen" : "Mark done");
       doneBtn.onclick = () =>
-        updateGoal(g.id, {
-          leader_notes: notes.value,
-          status: isDone ? "open" : "done",
-        });
-      card.appendChild(doneBtn);
+        updateGoal(g.id, { leader_notes: notes.value, status: isDone ? "open" : "done" });
+      btns.appendChild(saveBtn);
+      btns.appendChild(doneBtn);
+      card.appendChild(btns);
     } else if (g.leader_notes) {
-      const n = document.createElement("p");
-      n.textContent = "Notes: " + g.leader_notes;
-      card.appendChild(n);
+      card.appendChild(el("p", "note", "Notes: " + g.leader_notes));
     }
 
     list.appendChild(card);
@@ -336,9 +187,27 @@ async function updateGoal(id, changes) {
 
   if (error) return say(error.message);
   if (data.length === 0) return say("You're not allowed to change that goal.");
-  say("");
+  say("Saved", "ok");
   loadGoals();
 }
+
+$("addGoalBtn").onclick = async () => {
+  const text = $("goalText").value.trim();
+  if (!text) return say("Type a goal first.");
+
+  const { error } = await db.from("rehearsal_goals").insert({
+    org_id: me.org_id,
+    created_by: me.id,
+    target_section: $("goalSection").value,
+    goal_text: text,
+  });
+
+  if (error) return say(error.message);
+  say("Goal assigned", "ok");
+  $("goalText").value = "";
+  $("goalForm").open = false;
+  loadGoals();
+};
 
 /* ---------- PASS-OFF BOARD ---------- */
 
@@ -357,82 +226,69 @@ async function loadPassOffs() {
 
   const items = itemsRes.data;
   if (items.length === 0) {
-    list.textContent = "No pass-off items yet.";
+    list.appendChild(el("div", "empty", "No pass-off items yet."));
     return;
   }
 
-  const students = rosterRes.data.filter((u) =>
-    ["member", "section_leader"].includes(u.role)
-  );
+  const students = rosterRes.data.filter((u) => ["member", "section_leader"].includes(u.role));
   const names = {};
   rosterRes.data.forEach((u) => (names[u.id] = u.full_name));
 
   const records = {};
-  recordsRes.data.forEach((r) => {
-    records[r.student_id + "|" + r.pass_off_item_id] = r;
-  });
+  recordsRes.data.forEach((r) => (records[r.student_id + "|" + r.pass_off_item_id] = r));
 
   const canMark = ["director", "section_leader"].includes(me.role);
 
   items.forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "card";
+    const card = el("div", "card");
+    card.appendChild(el("strong", "", item.title));
 
-    const title = document.createElement("p");
-    title.innerHTML = "<strong></strong>";
-    title.querySelector("strong").textContent = item.title;
-    card.appendChild(title);
-
-    const meta = document.createElement("p");
-    meta.className = "small";
     const bits = [item.movement, item.measure_range && "mm. " + item.measure_range];
     if (item.due_date) bits.push("due " + item.due_date);
-    meta.textContent = bits.filter(Boolean).join(" • ");
-    card.appendChild(meta);
+    card.appendChild(el("p", "sub", bits.filter(Boolean).join(" • ")));
+
+    // Progress bar: how many of the students you can see have passed
+    const passedCount = students.filter(
+      (s) => (records[s.id + "|" + item.id] || {}).status === "passed"
+    ).length;
+    const pct = students.length ? Math.round((passedCount / students.length) * 100) : 0;
+    const bar = el("div", "bar");
+    const fill = el("span");
+    fill.style.width = pct + "%";
+    bar.appendChild(fill);
+    card.appendChild(bar);
+    card.appendChild(el("p", "sub", passedCount + " of " + students.length + " passed (" + pct + "%)"));
 
     students.forEach((s) => {
       const rec = records[s.id + "|" + item.id];
       const status = rec ? rec.status : "not_started";
 
-      const row = document.createElement("div");
-      row.className = "student-row";
-
-      const label = document.createElement("div");
-      const nameEl = document.createElement("span");
-      nameEl.textContent = s.full_name + (s.section ? " (" + s.section + ")" : "");
-      label.appendChild(nameEl);
-
+      const row = el("div", "student-row");
+      const label = el("div", "nm");
+      label.appendChild(el("span", "", s.full_name));
+      if (s.section) label.appendChild(el("div", "sub", s.section));
       if (rec && rec.status === "passed") {
-        const when = document.createElement("div");
-        when.className = "small";
         const who = names[rec.verified_by];
-        when.textContent =
-          "Passed " + new Date(rec.timestamp).toLocaleDateString() +
-          (who ? " by " + who : "");
-        label.appendChild(when);
+        label.appendChild(
+          el("div", "sub",
+            "Passed " + new Date(rec.timestamp).toLocaleDateString() + (who ? " by " + who : ""))
+        );
       }
       row.appendChild(label);
 
       if (canMark) {
-        const sel = document.createElement("select");
-        [
-          ["not_started", "Not started"],
-          ["in_progress", "In progress"],
-          ["passed", "Passed"],
-        ].forEach(([value, text]) => {
-          const opt = document.createElement("option");
-          opt.value = value;
-          opt.textContent = text;
-          if (value === status) opt.selected = true;
-          sel.appendChild(opt);
-        });
+        const sel = el("select", "status-select s-" + status);
+        [["not_started", "Not started"], ["in_progress", "In progress"], ["passed", "Passed"]]
+          .forEach(([value, text]) => {
+            const opt = option(value, text);
+            if (value === status) opt.selected = true;
+            sel.appendChild(opt);
+          });
         sel.onchange = () => setPassOff(s.id, item.id, sel.value);
         row.appendChild(sel);
       } else {
-        const st = document.createElement("span");
-        st.className = status === "passed" ? "passed" : "";
-        st.textContent = status.replace("_", " ");
-        row.appendChild(st);
+        const text = status.replace("_", " ");
+        row.appendChild(el("span", "badge " + (status === "passed" ? "done" : "none"), text));
       }
 
       card.appendChild(row);
@@ -457,7 +313,6 @@ async function setPassOff(studentId, itemId, status) {
 
   await loadPassOffs();
   if (error) say(error.message);
-  else say("");
 }
 
 $("addItemBtn").onclick = async () => {
@@ -473,38 +328,196 @@ $("addItemBtn").onclick = async () => {
   });
 
   if (error) return say(error.message);
-  say("");
-  ["itemTitle", "itemMovement", "itemMeasures", "itemDue"].forEach(
-    (id) => ($(id).value = "")
-  );
+  say("Item added", "ok");
+  ["itemTitle", "itemMovement", "itemMeasures", "itemDue"].forEach((id) => ($(id).value = ""));
+  $("itemForm").open = false;
   loadPassOffs();
 };
 
-/* ---------- GOALS FORM + AUTH ---------- */
+/* ---------- ATTENDANCE ---------- */
 
-$("addGoalBtn").onclick = async () => {
-  const text = $("goalText").value.trim();
-  if (!text) return say("Type a goal first.");
+async function loadAttendance() {
+  const date = $("attDate").value || today();
 
-  const { error } = await db.from("rehearsal_goals").insert({
-    org_id: me.org_id,
-    created_by: me.id,
-    target_section: $("goalSection").value,
-    goal_text: text,
+  const [rosterRes, logsRes] = await Promise.all([
+    db.from("users").select("id, full_name, section, role").order("full_name"),
+    db.from("attendance_logs").select("*").eq("date", date),
+  ]);
+
+  const list = $("attList");
+  list.innerHTML = "";
+  $("attSummary").innerHTML = "";
+
+  const err = rosterRes.error || logsRes.error;
+  if (err) return say(err.message);
+
+  const people = rosterRes.data.filter((u) => ["member", "section_leader"].includes(u.role));
+  if (people.length === 0) {
+    list.appendChild(el("div", "empty", "No students to show."));
+    return;
+  }
+
+  const logs = {};
+  logsRes.data.forEach((l) => (logs[l.student_id] = l));
+
+  const counts = { present: 0, tardy: 0, absent: 0 };
+  logsRes.data.forEach((l) => counts[l.status]++);
+  const notRecorded = people.length - logsRes.data.length;
+  $("attSummary").appendChild(el("span", "chip present", "Present " + counts.present));
+  $("attSummary").appendChild(el("span", "chip tardy", "Tardy " + counts.tardy));
+  $("attSummary").appendChild(el("span", "chip absent", "Absent " + counts.absent));
+  $("attSummary").appendChild(el("span", "chip none", "Not recorded " + notRecorded));
+
+  const canMark = ["director", "section_leader"].includes(me.role);
+
+  people.forEach((p) => {
+    const status = logs[p.id] ? logs[p.id].status : "";
+    const row = el("div", "student-row");
+
+    const label = el("div", "nm");
+    label.appendChild(el("span", "", p.full_name));
+    if (p.section) label.appendChild(el("div", "sub", p.section));
+    row.appendChild(label);
+
+    if (canMark) {
+      const seg = el("div", "seg");
+      [["present", "P", "Present"], ["tardy", "T", "Tardy"], ["absent", "A", "Absent"]]
+        .forEach(([value, short, full]) => {
+          const b = el("button", "seg-btn " + value + (status === value ? " on" : ""), short);
+          b.type = "button";
+          b.title = full;
+          b.onclick = () => {
+            // Tapping the active button clears it (directors only, per the rules)
+            if (status === value && me.role !== "director") return;
+            setAttendance(p.id, date, status === value ? "" : value);
+          };
+          seg.appendChild(b);
+        });
+      row.appendChild(seg);
+    } else {
+      row.appendChild(el("span", "badge " + (status || "none"), status || "not recorded"));
+    }
+
+    list.appendChild(row);
   });
+}
 
+async function setAttendance(studentId, date, status) {
+  let result;
+
+  if (status === "") {
+    result = await db
+      .from("attendance_logs")
+      .delete()
+      .eq("student_id", studentId)
+      .eq("date", date);
+  } else {
+    result = await db.from("attendance_logs").upsert(
+      {
+        org_id: me.org_id,
+        student_id: studentId,
+        date: date,
+        status: status,
+        recorded_by: me.id,
+      },
+      { onConflict: "student_id,date" }
+    );
+  }
+
+  await loadAttendance();
+  if (result.error) say(result.error.message);
+}
+
+/* ---------- ROSTER ---------- */
+
+async function loadJoinCode() {
+  const { data } = await db.from("join_codes").select("code").maybeSingle();
+  $("joinCodeText").textContent = data ? data.code : "none yet";
+}
+
+$("newCodeBtn").onclick = async () => {
+  const { data, error } = await db.rpc("new_join_code");
   if (error) return say(error.message);
-  say("");
-  $("goalText").value = "";
-  loadGoals();
+  say("New code generated", "ok");
+  $("joinCodeText").textContent = data;
 };
+
+async function loadRoster() {
+  const { data, error } = await db
+    .from("users")
+    .select("id, full_name, role, section, instrument")
+    .order("full_name");
+
+  const list = $("rosterList");
+  list.innerHTML = "";
+  if (error) return say(error.message);
+
+  const isDirector = me.role === "director";
+
+  data.forEach((u) => {
+    const card = el("div", "card");
+
+    const head = el("div", "row");
+    head.appendChild(el("strong", "", u.full_name));
+    head.appendChild(el("span", "badge pill", u.role.replace("_", " ")));
+    card.appendChild(head);
+
+    card.appendChild(
+      el("p", "sub", [u.section, u.instrument].filter(Boolean).join(" • ") || "No section yet")
+    );
+
+    // Directors can edit everyone except themselves
+    if (isDirector && u.id !== me.id) {
+      const edit = el("div", "edit-row");
+
+      const roleSel = el("select");
+      ROLES.forEach((r) => {
+        const opt = option(r, r.replace("_", " "));
+        if (r === u.role) opt.selected = true;
+        roleSel.appendChild(opt);
+      });
+
+      const secSel = el("select");
+      fillSections(secSel, true);
+      secSel.value = u.section || "";
+
+      const save = () =>
+        updateUser(u.id, { role: roleSel.value, section: secSel.value || null });
+      roleSel.onchange = save;
+      secSel.onchange = save;
+
+      edit.appendChild(roleSel);
+      edit.appendChild(secSel);
+      card.appendChild(edit);
+    }
+
+    list.appendChild(card);
+  });
+}
+
+async function updateUser(id, changes) {
+  const { data, error } = await db
+    .from("users")
+    .update(changes)
+    .eq("id", id)
+    .select();
+
+  if (error) say(error.message);
+  else if (data.length === 0) say("You're not allowed to change that person.");
+  else say("Updated", "ok");
+  loadRoster();
+  loadPassOffs();
+  loadAttendance();
+}
+
+/* ---------- AUTH ---------- */
 
 $("signupBtn").onclick = async () => {
   const { error } = await db.auth.signUp({
     email: $("email").value,
     password: $("password").value,
   });
-  say(error ? error.message : "");
+  if (error) say(error.message);
   refresh();
 };
 
@@ -513,7 +526,8 @@ $("loginBtn").onclick = async () => {
     email: $("email").value,
     password: $("password").value,
   });
-  say(error ? error.message : "");
+  if (error) return say(error.message);
+  say("");
   refresh();
 };
 
@@ -522,7 +536,8 @@ $("createBandBtn").onclick = async () => {
     band_name: $("bandName").value,
     my_name: $("myName").value,
   });
-  say(error ? error.message : "");
+  if (error) return say(error.message);
+  say("");
   refresh();
 };
 
@@ -533,7 +548,8 @@ $("joinBandBtn").onclick = async () => {
     my_section: $("joinSection").value,
     my_instrument: $("joinInstrument").value,
   });
-  say(error ? error.message : "");
+  if (error) return say(error.message);
+  say("");
   refresh();
 };
 

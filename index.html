@@ -2,79 +2,142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1f3a">
   <title>Section Leader HQ</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Section Leader HQ</h1>
-  <p id="message"></p>
+  <div id="toast" class="toast hidden"></div>
 
-  <section id="auth" class="hidden">
-    <h2>Log in</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password (6+ characters)">
-    <button id="loginBtn">Log in</button>
-    <button id="signupBtn">Sign up</button>
+  <!-- LOGIN -->
+  <section id="auth" class="screen hidden">
+    <div class="brand-hero">
+      <div class="logo">🎺</div>
+      <h1>Section Leader HQ</h1>
+      <p>Rehearsal accountability for your band</p>
+    </div>
+    <div class="card">
+      <input id="email" type="email" placeholder="Email" autocomplete="email">
+      <input id="password" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+      <button class="btn" id="loginBtn">Log in</button>
+      <button class="btn ghost" id="signupBtn">Sign up</button>
+    </div>
   </section>
 
-  <section id="setup" class="hidden">
-    <h2>Join your band</h2>
-    <input id="joinCode" placeholder="Join code from your director">
-    <input id="joinName" placeholder="Your full name">
-    <select id="joinSection"></select>
-    <input id="joinInstrument" placeholder="Instrument (e.g. Alto Sax)">
-    <button id="joinBandBtn">Join band</button>
+  <!-- JOIN / CREATE BAND -->
+  <section id="setup" class="screen hidden">
+    <div class="brand-hero">
+      <div class="logo">🥁</div>
+      <h1>Get started</h1>
+      <p>Join your band or start a new one</p>
+    </div>
 
-    <h3>Or start a new band (directors)</h3>
-    <input id="bandName" placeholder="Band name">
-    <input id="myName" placeholder="Your full name">
-    <button id="createBandBtn">Create band</button>
-    <button id="setupLogoutBtn">Log out</button>
+    <div class="card">
+      <h3>Join your band</h3>
+      <input id="joinCode" placeholder="Join code from your director">
+      <input id="joinName" placeholder="Your full name">
+      <select id="joinSection"></select>
+      <input id="joinInstrument" placeholder="Instrument (e.g. Alto Sax)">
+      <button class="btn" id="joinBandBtn">Join band</button>
+    </div>
+
+    <div class="card">
+      <h3>Start a new band (directors)</h3>
+      <input id="bandName" placeholder="Band name">
+      <input id="myName" placeholder="Your full name">
+      <button class="btn gold" id="createBandBtn">Create band</button>
+    </div>
+
+    <button class="btn ghost" id="setupLogoutBtn">Log out</button>
   </section>
 
+  <!-- MAIN APP -->
   <section id="home" class="hidden">
-    <h2 id="welcome"></h2>
-
-    <div id="goalForm" class="hidden">
-      <h3>Assign a goal</h3>
-      <select id="goalSection"></select>
-      <textarea id="goalText" placeholder="e.g. Clean up mm. 40-48 at 120 bpm"></textarea>
-      <button id="addGoalBtn">Assign goal</button>
-    </div>
-
-    <h3>Rehearsal goals</h3>
-    <div id="goalList"></div>
-
-    <div id="itemForm" class="hidden">
-      <h3>Add a pass-off item</h3>
-      <input id="itemTitle" placeholder="Title (e.g. Opener, mm. 1-32)">
-      <input id="itemMovement" placeholder="Movement (e.g. Movement 1)">
-      <input id="itemMeasures" placeholder="Measures (e.g. 1-32)">
-      <input id="itemDue" type="date">
-      <button id="addItemBtn">Add item</button>
-    </div>
-
-    <h3>Pass-off board</h3>
-    <div id="passOffList"></div>
-
-    <h3>Attendance</h3>
-    <input id="attDate" type="date">
-    <p id="attSummary" class="small"></p>
-    <div id="attList"></div>
-
-    <div id="rosterBox" class="hidden">
-      <h3>Roster</h3>
-      <div id="inviteBox" class="hidden card">
-        <p class="small">Join code (give this to your members):</p>
-        <p id="joinCodeText" class="code">none yet</p>
-        <button id="newCodeBtn">Generate new code</button>
+    <header class="topbar">
+      <div class="who">
+        <div class="name" id="welcome"></div>
+        <span class="badge role" id="roleBadge"></span>
       </div>
-      <div id="rosterList"></div>
-    </div>
+      <button class="btn ghost small" id="logoutBtn">Log out</button>
+    </header>
 
-    <button id="logoutBtn">Log out</button>
+    <main class="content">
+
+      <!-- GOALS -->
+      <div id="tab-goals" class="panel">
+        <h2 class="section-title">Rehearsal goals</h2>
+
+        <details id="goalForm" class="card form-card hidden">
+          <summary>Assign a goal</summary>
+          <select id="goalSection"></select>
+          <textarea id="goalText" placeholder="e.g. Clean up mm. 40-48 at 120 bpm"></textarea>
+          <button class="btn" id="addGoalBtn">Assign goal</button>
+        </details>
+
+        <div id="goalList"></div>
+      </div>
+
+      <!-- PASS-OFFS -->
+      <div id="tab-passoffs" class="panel hidden">
+        <h2 class="section-title">Pass-off board</h2>
+
+        <details id="itemForm" class="card form-card hidden">
+          <summary>Add a pass-off item</summary>
+          <input id="itemTitle" placeholder="Title (e.g. Opener, mm. 1-32)">
+          <input id="itemMovement" placeholder="Movement (e.g. Movement 1)">
+          <input id="itemMeasures" placeholder="Measures (e.g. 1-32)">
+          <input id="itemDue" type="date">
+          <button class="btn" id="addItemBtn">Add item</button>
+        </details>
+
+        <div id="passOffList"></div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div id="tab-attendance" class="panel hidden">
+        <h2 class="section-title">Attendance</h2>
+        <div class="card">
+          <input id="attDate" type="date">
+          <div id="attSummary" class="chips"></div>
+        </div>
+        <div id="attList" class="card"></div>
+      </div>
+
+      <!-- ROSTER -->
+      <div id="tab-roster" class="panel hidden">
+        <h2 class="section-title">Roster</h2>
+
+        <div id="inviteBox" class="card hidden">
+          <p class="sub">Join code (give this to your members)</p>
+          <p id="joinCodeText" class="code">none yet</p>
+          <button class="btn ghost" id="newCodeBtn">Generate new code</button>
+        </div>
+
+        <div id="rosterList"></div>
+      </div>
+
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab active" data-tab="goals"><span class="ico">🎯</span>Goals</button>
+      <button class="tab" data-tab="passoffs"><span class="ico">✅</span>Pass-offs</button>
+      <button class="tab" data-tab="attendance"><span class="ico">📋</span>Attendance</button>
+      <button class="tab" data-tab="roster" id="rosterTab"><span class="ico">👥</span>Roster</button>
+    </nav>
   </section>
+
+  <!-- Shows any crash on screen (safe to delete once everything is stable) -->
+  <script>
+    window.addEventListener("error", function (e) {
+      var box = document.createElement("pre");
+      box.style.cssText =
+        "position:fixed;z-index:99;top:0;left:0;right:0;margin:0;padding:12px;" +
+        "background:#fff;color:#c00;white-space:pre-wrap;font-size:14px";
+      box.textContent = "ERROR: " + e.message + "\n" + (e.filename || "") + " line " + e.lineno;
+      document.body.appendChild(box);
+    });
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
