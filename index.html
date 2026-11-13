@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section Leader HQ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Section Leader HQ</h1>
+  <p id="message"></p>
+
+  <section id="auth" class="hidden">
+    <h2>Log in</h2>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="loginBtn">Log in</button>
+    <button id="signupBtn">Sign up</button>
+  </section>
+
+  <section id="setup" class="hidden">
+    <h2>Create your band</h2>
+    <input id="bandName" placeholder="Band name">
+    <input id="myName" placeholder="Your full name">
+    <button id="createBandBtn">Create band</button>
+  </section>
+
+  <section id="home" class="hidden">
+    <h2 id="welcome"></h2>
+
+    <div id="goalForm" class="hidden">
+      <h3>Assign a goal</h3>
+      <select id="goalSection">
+        <option>Flutes</option>
+        <option>Clarinets</option>
+        <option>Saxophones</option>
+        <option>Trumpets</option>
+        <option>Mellophones</option>
+        <option>Trombones</option>
+        <option>Baritones</option>
+        <option>Tubas</option>
+        <option>Drumline</option>
+        <option>Color Guard</option>
+      </select>
+      <textarea id="goalText" placeholder="e.g. Clean up mm. 40-48 at 120 bpm"></textarea>
+      <button id="addGoalBtn">Assign goal</button>
+    </div>
+
+    <h3>Rehearsal goals</h3>
+    <div id="goalList"></div>
+
+    <button id="logoutBtn">Log out</button>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
