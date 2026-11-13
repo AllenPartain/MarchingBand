@@ -13,16 +13,24 @@
   <section id="auth" class="hidden">
     <h2>Log in</h2>
     <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+    <input id="password" type="password" placeholder="Password (6+ characters)">
     <button id="loginBtn">Log in</button>
     <button id="signupBtn">Sign up</button>
   </section>
 
   <section id="setup" class="hidden">
-    <h2>Create your band</h2>
+    <h2>Join your band</h2>
+    <input id="joinCode" placeholder="Join code from your director">
+    <input id="joinName" placeholder="Your full name">
+    <select id="joinSection"></select>
+    <input id="joinInstrument" placeholder="Instrument (e.g. Alto Sax)">
+    <button id="joinBandBtn">Join band</button>
+
+    <h3>Or start a new band (directors)</h3>
     <input id="bandName" placeholder="Band name">
     <input id="myName" placeholder="Your full name">
     <button id="createBandBtn">Create band</button>
+    <button id="setupLogoutBtn">Log out</button>
   </section>
 
   <section id="home" class="hidden">
@@ -30,24 +38,40 @@
 
     <div id="goalForm" class="hidden">
       <h3>Assign a goal</h3>
-      <select id="goalSection">
-        <option>Flutes</option>
-        <option>Clarinets</option>
-        <option>Saxophones</option>
-        <option>Trumpets</option>
-        <option>Mellophones</option>
-        <option>Trombones</option>
-        <option>Baritones</option>
-        <option>Tubas</option>
-        <option>Drumline</option>
-        <option>Color Guard</option>
-      </select>
+      <select id="goalSection"></select>
       <textarea id="goalText" placeholder="e.g. Clean up mm. 40-48 at 120 bpm"></textarea>
       <button id="addGoalBtn">Assign goal</button>
     </div>
 
     <h3>Rehearsal goals</h3>
     <div id="goalList"></div>
+
+    <div id="itemForm" class="hidden">
+      <h3>Add a pass-off item</h3>
+      <input id="itemTitle" placeholder="Title (e.g. Opener, mm. 1-32)">
+      <input id="itemMovement" placeholder="Movement (e.g. Movement 1)">
+      <input id="itemMeasures" placeholder="Measures (e.g. 1-32)">
+      <input id="itemDue" type="date">
+      <button id="addItemBtn">Add item</button>
+    </div>
+
+    <h3>Pass-off board</h3>
+    <div id="passOffList"></div>
+
+    <h3>Attendance</h3>
+    <input id="attDate" type="date">
+    <p id="attSummary" class="small"></p>
+    <div id="attList"></div>
+
+    <div id="rosterBox" class="hidden">
+      <h3>Roster</h3>
+      <div id="inviteBox" class="hidden card">
+        <p class="small">Join code (give this to your members):</p>
+        <p id="joinCodeText" class="code">none yet</p>
+        <button id="newCodeBtn">Generate new code</button>
+      </div>
+      <div id="rosterList"></div>
+    </div>
 
     <button id="logoutBtn">Log out</button>
   </section>

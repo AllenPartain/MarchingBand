@@ -15,3 +15,23 @@ input, button {
 }
 button { cursor: pointer; }
 .hidden { display: none; }
+.student-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid #eee;
+}
+.student-row select { width: auto; margin: 0; padding: 0.4rem; }
+.small { font-size: 0.8rem; color: #666; }
+.passed { color: green; font-weight: bold; }
+.code {
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 0.15rem;
+}
+.student-row { flex-wrap: wrap; }
+.present { color: green; font-weight: bold; }
+.absent { color: #c0392b; font-weight: bold; }
+.tardy { color: #d68910; font-weight: bold; }
