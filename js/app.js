@@ -9,12 +9,14 @@ import * as passoffs from "./passoffs.js";
 import * as attendance from "./attendance.js";
 import * as chat from "./chat.js";
 import * as roster from "./roster.js";
+import { initTuner } from "./tuner.js";
 
 const TABS = [
   { id: "home", label: "Home", icon: "home" },
   { id: "goals", label: "Goals", icon: "target" },
   { id: "passoffs", label: "Pass-offs", icon: "check" },
   { id: "attendance", label: "Attendance", icon: "calendar" },
+  { id: "tuner", label: "Tuner", icon: "target" },
   { id: "chat", label: "Chat", icon: "chat" },
   { id: "roster", label: "Roster", icon: "users", hide: () => state.me.role === "member" },
 ];
@@ -84,6 +86,7 @@ async function start() {
     booted = true;
     buildNav();
     [home, goals, passoffs, attendance, chat, roster].forEach((m) => m.init());
+    initTuner();
   }
 
   showScreen("app");

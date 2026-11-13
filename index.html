@@ -173,6 +173,60 @@
           <div id="rosterList" class="card list"></div>
         </section>
 
+        <!-- TUNER -->
+        <section id="tab-tuner" class="panel hidden">
+          <div class="page-head">
+            <h1 class="page-title">Tuner</h1>
+            <span class="sub" id="tunerFreq">— Hz</span>
+          </div>
+
+          <div class="card tuner-card">
+            <div class="filters tuner-top-bar">
+              <select id="tunerTranspose" class="select-sm" aria-label="Instrument Key">
+                <option value="0">Concert (C)</option>
+                <option value="2">Bb (Trumpet / Clarinet / Tenor)</option>
+                <option value="9">Eb (Alto / Bari Sax)</option>
+                <option value="7">F (Mellophone / Horn)</option>
+              </select>
+              <select id="tunerRefA4" class="select-sm" aria-label="A4 Calibration">
+                <option value="440" selected>A = 440 Hz</option>
+                <option value="442">A = 442 Hz</option>
+              </select>
+            </div>
+
+            <!-- Classic Analog Arc Gauge (-50 to +50 by 10s, -10 to +10 green zone) -->
+            <div class="tuner-gauge">
+              <svg viewBox="0 0 300 180" class="tuner-svg" aria-hidden="true">
+                <!-- Background Arc -->
+                <path d="M 30 155 A 120 120 0 0 1 270 155" class="gauge-track" />
+                <!-- Green In-Tune Center Zone (-10 to +10 cents) -->
+                <path d="M 118.9 39.1 A 120 120 0 0 1 181.1 39.1" class="gauge-sweetspot" />
+                <!-- Tick Marks & Numbers (-50 to +50 by 10s) generated via JS -->
+                <g id="tunerTicks"></g>
+              </svg>
+
+              <!-- Pivoting Needle -->
+              <div id="tunerNeedle" class="gauge-needle"></div>
+              <div class="gauge-pivot"></div>
+
+              <!-- Center Note & Cents Readout -->
+              <div class="gauge-readout">
+                <div class="tuner-note-wrap">
+                  <span id="tunerNote">--</span><span id="tunerOctave"></span>
+                </div>
+                <div id="tunerCents" class="tuner-cents-pill">0¢</div>
+              </div>
+            </div>
+
+            <div id="tunerStatus" class="tuner-status-bar">Tap Start to Tune</div>
+
+            <div class="btn-row tuner-actions">
+              <button class="btn block" id="tunerToggleBtn">Start Tuner</button>
+              <button class="btn secondary" id="tunerDroneBtn" title="Play Concert Bb Drone">Bb Drone</button>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   </div>

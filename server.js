@@ -15,6 +15,7 @@ const assets = new Map([
   ["/js/home.js", ["js/home.js", "text/javascript; charset=utf-8"]],
   ["/js/passoffs.js", ["js/passoffs.js", "text/javascript; charset=utf-8"]],
   ["/js/roster.js", ["js/roster.js", "text/javascript; charset=utf-8"]],
+  ["/js/tuner.js", ["js/tuner.js", "text/javascript; charset=utf-8"]],
   ["/sw.js", ["sw.js", "text/javascript; charset=utf-8"]],
 ]);
 
