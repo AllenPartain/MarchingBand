@@ -10,6 +10,7 @@ import * as attendance from "./attendance.js";
 import * as chat from "./chat.js";
 import * as roster from "./roster.js";
 import { initTuner } from "./tuner.js";
+import { initMusic, stopMusic } from "./music.js"; // <-- ADDED MUSIC IMPORT
 
 const TABS = [
   { id: "home", label: "Home", icon: "home" },
@@ -17,6 +18,7 @@ const TABS = [
   { id: "passoffs", label: "Pass-offs", icon: "check" },
   { id: "attendance", label: "Attendance", icon: "calendar" },
   { id: "tuner", label: "Tuner", icon: "target" },
+  { id: "music", label: "Practice", icon: "play" }, // <-- ADDED MUSIC TAB
   { id: "chat", label: "Chat", icon: "chat" },
   { id: "roster", label: "Roster", icon: "users", hide: () => state.me.role === "member" },
 ];
@@ -48,6 +50,12 @@ function buildNav() {
 
 function go(tab) {
   if (!visibleTabs().some((t) => t.id === tab)) tab = "home";
+  
+  // <-- ADDED: Stop the music if the user leaves the Practice tab
+  if (state.tab === "music" && tab !== "music") {
+    if (typeof stopMusic === "function") stopMusic();
+  }
+
   state.tab = tab;
   document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("hidden", p.id !== "tab-" + tab));
   document.querySelectorAll(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
@@ -87,6 +95,7 @@ async function start() {
     buildNav();
     [home, goals, passoffs, attendance, chat, roster].forEach((m) => m.init());
     initTuner();
+    initMusic(); // <-- ADDED MUSIC INIT
   }
 
   showScreen("app");

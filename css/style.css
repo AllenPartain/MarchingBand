@@ -706,3 +706,54 @@ details.item summary::-webkit-details-marker { display: none; }
   color: #0a0f1a;
   font-weight: 700;
 }
+/* SONG FOLDERS & PRACTICE LIBRARY */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.song-folder-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #14171f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.song-folder-card:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+}
+
+.folder-icon {
+  font-size: 2rem;
+}
+
+.folder-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.player-header {
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.song-title-display {
+  font-size: 1.1rem;
+  color: #f8fafc;
+}

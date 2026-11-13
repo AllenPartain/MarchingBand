@@ -13,6 +13,7 @@ const assets = new Map([
   ["/js/core.js", ["js/core.js", "text/javascript; charset=utf-8"]],
   ["/js/goals.js", ["js/goals.js", "text/javascript; charset=utf-8"]],
   ["/js/home.js", ["js/home.js", "text/javascript; charset=utf-8"]],
+  ["/js/music.js", ["js/music.js", "text/javascript; charset=utf-8"]],
   ["/js/passoffs.js", ["js/passoffs.js", "text/javascript; charset=utf-8"]],
   ["/js/roster.js", ["js/roster.js", "text/javascript; charset=utf-8"]],
   ["/js/tuner.js", ["js/tuner.js", "text/javascript; charset=utf-8"]],
