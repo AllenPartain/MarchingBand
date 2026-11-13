@@ -60,10 +60,10 @@ function render() {
 
   const tiles = el("div", "tiles");
   if (leader) {
-    tiles.append(tile(`${todayRows.length}/${people.length}`, "Marked today"), tile(openGoals, "Open goals"), tile(readyPct, "Pass-off readiness"));
+    tiles.append(tile(`${todayRows.length}/${people.length}`, "Marked today"), tile(openGoals, "Open goals"), tile(readyPct, "Music check readiness"));
   } else {
     const mine = todayRows[0];
-    tiles.append(tile(mine ? mine[0].toUpperCase() + mine.slice(1) : "—", "My attendance today"), tile(openGoals, "Open goals"), tile(ready ? `${ready.done}/${ready.total}` : "—", "My pass-offs"));
+    tiles.append(tile(mine ? mine[0].toUpperCase() + mine.slice(1) : "—", "My attendance today"), tile(openGoals, "Open goals"), tile(ready ? `${ready.done}/${ready.total}` : "—", "My music checks"));
   }
   out.push(tiles);
 
@@ -91,8 +91,8 @@ function render() {
           row.append(el("span", "", sec), bar, el("b", "", pct + "%"));
           return row;
         })
-      : [empty("Add pass-off items to see readiness.")];
-    out.push(section("Pass-off readiness by section", ...rows));
+      : [empty("Add music checks to see readiness.")];
+    out.push(section("Music check readiness by section", ...rows));
   }
 
   if (latest) {

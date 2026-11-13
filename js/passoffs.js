@@ -43,7 +43,7 @@ function render() {
   const list = $("poList");
   if (!loaded) return list.replaceChildren(skeleton(3));
   if (!state.items.length) {
-    return list.replaceChildren(empty(can.manageItems() ? "No pass-off items yet. Add the first one." : "No pass-off items yet."));
+    return list.replaceChildren(empty(can.manageItems() ? "No music checks yet. Add the first one." : "No music checks yet."));
   }
   const ps = people();
   const nodes = [];
@@ -98,7 +98,7 @@ function itemCard(item, ps) {
     });
     if (!ps.length) nodes.push(empty("No one to show."));
     if (can.manageItems()) {
-      const del = el("button", "btn secondary xs", "Delete item");
+      const del = el("button", "btn secondary xs", "Delete music check");
       del.onclick = () => removeItem(item);
       nodes.push(del);
     }
@@ -167,12 +167,12 @@ function studentRow(item, p, onChange) {
 }
 
 async function removeItem(item) {
-  if (!confirm(`Delete "${item.title}" and all of its pass-off records?`)) return;
+  if (!confirm(`Delete "${item.title}" and all of its music-check records?`)) return;
   const a = await db.from("student_pass_offs").delete().eq("pass_off_item_id", item.id);
   if (a.error) return toast(a.error.message);
   const b = await db.from("pass_off_items").delete().eq("id", item.id);
   if (b.error) return toast(b.error.message);
-  toast("Item deleted", "ok");
+  toast("Music check deleted", "ok");
   load();
 }
 
@@ -182,9 +182,9 @@ function openNew() {
   const move = el("input"); move.placeholder = "Movement (e.g. Movement 1)";
   const meas = el("input"); meas.placeholder = "Measures (e.g. 1-32)";
   const due = el("input"); due.type = "date";
-  const go = el("button", "btn block", "Add item");
+  const go = el("button", "btn block", "Add music check");
   go.onclick = async () => {
-    if (!title.value.trim()) return toast("Give the item a title.");
+    if (!title.value.trim()) return toast("Give the music check a title.");
     go.disabled = true;
     const { error } = await db.from("pass_off_items").insert({
       org_id: state.me.org_id,
@@ -196,9 +196,9 @@ function openNew() {
     go.disabled = false;
     if (error) return toast(error.message);
     closeModal();
-    toast("Item added", "ok");
+    toast("Music check added", "ok");
     load();
   };
   form.append(title, move, meas, due, go);
-  openModal("New pass-off item", form);
+  openModal("New music check", form);
 }

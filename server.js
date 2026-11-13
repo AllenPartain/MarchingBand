@@ -27,7 +27,12 @@ http.createServer((request, response) => {
     return;
   }
 
-  const asset = assets.get(new URL(request.url ?? "/", "http://localhost").pathname);
+  const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
+  const asset = assets.get(pathname) ?? (
+    /^\/js\/[A-Za-z0-9_-]+\.js$/.test(pathname)
+      ? [pathname.slice(1), "text/javascript; charset=utf-8"]
+      : null
+  );
   if (!asset) {
     response.writeHead(404);
     response.end("Not Found");

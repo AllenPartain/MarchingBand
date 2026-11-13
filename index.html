@@ -114,8 +114,8 @@
         <!-- PASS-OFFS -->
         <section id="tab-passoffs" class="panel hidden">
           <div class="page-head">
-            <h1 class="page-title">Pass-offs</h1>
-            <button class="btn sm hidden" id="newItemBtn">+ New item</button>
+            <h1 class="page-title">Music Checks</h1>
+            <button class="btn sm hidden" id="newItemBtn">+ New music check</button>
           </div>
           <div class="filters"><select id="poSection" class="select-sm hidden"></select></div>
           <div id="poList"></div>
@@ -277,7 +277,166 @@
             <div id="osmdCanvas" class="osmd-container"></div>
           </div>
         </section>
+<!-- DRILL DESIGNER & YELLOW-DOT STUDIO -->
+        <section id="tab-drill" class="panel hidden">
+          <div class="page-head">
+            <div>
+              <h1 class="page-title">Drill Studio</h1>
+              <span class="sub" id="drillShowMeta">8-to-5 Field Designer & Yellow-Dot Viewer</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn secondary sm" id="drillDotBookBtn">Dot Book</button>
+              <button class="btn sm hidden" id="newShowBtn">+ New Show</button>
+            </div>
+          </div>
 
+          <!-- Top Bar: Show, Audio Track, Perspective & Grid Settings -->
+          <div class="card drill-studio-bar">
+            <div class="drill-bar-row">
+              <select id="drillShowSelect" class="select-sm" aria-label="Select Show"></select>
+              <select id="drillMusicSelect" class="select-sm" aria-label="Show Audio Track">
+                <option value="">Metronome Click Only</option>
+              </select>
+              <input id="drillBpmInput" type="number" min="40" max="260" value="144" title="Show BPM" class="drill-num-input">
+              <select id="drillHashSelect" class="select-sm" aria-label="Hash Standard">
+                <option value="hs">HS Hashes (53'4")</option>
+                <option value="ncaa">NCAA Hashes (60')</option>
+              </select>
+              <button class="btn secondary sm" id="drillPerspectiveBtn" title="Flip Press Box / Field View">Field View</button>
+              <button class="btn secondary sm" id="drillHeatmapBtn" title="Toggle Step-Size Difficulty Colors">Step Heatmap</button>
+            </div>
+
+            <!-- Director / Drum Major Pyware Tool Palette -->
+            <div id="drillLeaderPalette" class="drill-palette hidden">
+              <div class="drill-tool-group" role="toolbar" aria-label="Drawing Tools">
+                <button type="button" class="tool-btn active" data-tool="select" title="Select / Box Lasso / Rotate / Scale (V)">↖ Select</button>
+                <button type="button" class="tool-btn" data-tool="line" title="Draw Line Formation (L)">╱ Line</button>
+                <button type="button" class="tool-btn" data-tool="arc" title="Draw Arc / Curve Formation (C)">⌒ Arc</button>
+                <button type="button" class="tool-btn" data-tool="circle" title="Draw Circle / Pinwheel (O)">◯ Circle</button>
+                <button type="button" class="tool-btn" data-tool="block" title="Draw Rank & File Block (B)">⊞ Block</button>
+                <button type="button" class="tool-btn" data-tool="ftl" title="Draw Follow-The-Leader Path (F)">⤳ FTL Path</button>
+              </div>
+
+              <div class="drill-tool-group">
+                <label class="sub drill-inline-label" title="Number of dots when drawing on empty turf">
+                  Dots
+                  <input id="drillNewCountInput" type="number" min="2" max="64" value="8" class="drill-num-input">
+                </label>
+                <select id="drillSnapSelect" class="select-sm" title="Grid Snap">
+                  <option value="0.5">Snap: ½ Step</option>
+                  <option value="1">Snap: 1 Step</option>
+                  <option value="0.25">Snap: ¼ Step</option>
+                  <option value="0">Snap: Free</option>
+                </select>
+                <select id="drillSectionFilter" class="select-sm" title="Select Entire Section">
+                  <option value="">Select Section...</option>
+                  <option value="Woodwinds">All Woodwinds</option>
+                  <option value="Brass">All Brass</option>
+                  <option value="Percussion">All Percussion</option>
+                  <option value="Color Guard">All Color Guard</option>
+                </select>
+              </div>
+
+              <div class="drill-tool-group">
+                <button type="button" class="btn secondary sm" id="drillUndoBtn" title="Undo (Ctrl+Z)">↶ Undo</button>
+                <button type="button" class="btn secondary sm" id="drillRedoBtn" title="Redo (Ctrl+Y)">↷ Redo</button>
+                <button type="button" class="btn secondary sm" id="drillCurvePathBtn" title="Make transition into this set Curved">⌒ Curve Move</button>
+                <button type="button" class="btn secondary sm" id="drillLinearPathBtn" title="Make transition into this set Straight">╱ Straight Move</button>
+                <button type="button" class="btn secondary sm" id="drillMirrorHBtn" title="Mirror Selection Left/Right across 50">⇄ Mirror 50</button>
+                <button type="button" class="btn secondary sm" id="drillAutoPlaceBtn">Place Roster</button>
+                <button type="button" class="btn secondary sm" id="drillDeleteDotsBtn" title="Delete Selected Dots">🗑</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Set Strip & Set Inspector -->
+          <div class="card drill-set-bar">
+            <div class="drill-set-strip-row">
+              <div id="drillSetStrip" class="drill-set-strip"></div>
+              <div id="drillSetCrudBtns" class="btn-row hidden">
+                <button type="button" class="btn secondary sm" id="drillAddSetBtn">+ Next Set</button>
+                <button type="button" class="btn secondary sm" id="drillInsertSetBtn">+ Insert</button>
+                <button type="button" class="btn secondary sm" id="drillDeleteSetBtn">Delete Set</button>
+                <button type="button" class="btn sm" id="drillSaveSetBtn">Save Set</button>
+              </div>
+            </div>
+
+            <div id="drillLeaderSetMeta" class="drill-set-meta-row hidden">
+              <label class="sub drill-inline-label">
+                Label
+                <input id="drillSetLabelInput" type="text" value="Set 1" class="drill-label-input">
+              </label>
+              <label class="sub drill-inline-label">
+                Counts
+                <input id="drillSetCounts" type="number" min="0" max="256" value="16" class="drill-num-input">
+              </label>
+              <input id="drillSetNotes" type="text" placeholder="Set instructions (e.g., Horns up on ct 15, Jazz run to Front Hash)">
+            </div>
+          </div>
+
+          <!-- Field Canvas Viewport -->
+          <div class="card drill-canvas-wrap">
+            <div class="drill-canvas-hud">
+              <span class="sub" id="drillTopEdgeLabel">BACK SIDELINE (VISITOR)</span>
+              <div class="btn-row">
+                <span class="sub" id="drillCursorReadout">50-yd line · Front Hash</span>
+                <button type="button" class="btn secondary sm" id="drillZoomOutBtn">−</button>
+                <button type="button" class="btn secondary sm" id="drillZoomResetBtn">100%</button>
+                <button type="button" class="btn secondary sm" id="drillZoomInBtn">+</button>
+              </div>
+            </div>
+
+            <canvas id="drillCanvas"></canvas>
+
+            <div class="drill-canvas-hud drill-bottom-hud">
+              <span class="sub" id="drillLeftEdgeLabel">SIDE 1 (LEFT)</span>
+              <span class="sub" id="drillBottomEdgeLabel">FRONT SIDELINE (HOME)</span>
+              <span class="sub" id="drillRightEdgeLabel">SIDE 2 (RIGHT)</span>
+            </div>
+
+            <!-- Transport & Count Scrubber -->
+            <div class="drill-transport">
+              <div class="btn-row">
+                <button type="button" class="btn sm" id="drillPlayBtn">▶ Play Show</button>
+                <button type="button" class="btn secondary sm" id="drillLoopSetBtn" title="Loop transition into current set">🔁 Loop Set</button>
+                <button type="button" class="btn secondary sm" id="drillPrevSetBtn">⏮ Prev</button>
+                <button type="button" class="btn secondary sm" id="drillNextSetBtn">Next ⏭</button>
+              </div>
+              <div class="drill-scrubber-wrap">
+                <input id="drillScrubber" type="range" min="0" max="16" step="0.1" value="0" aria-label="Count Scrubber">
+                <span class="sub" id="drillCountDisplay">Set 1 · Count 0 / 16</span>
+              </div>
+            </div>
+            <audio id="drillShowAudio" class="hidden"></audio>
+          </div>
+
+          <!-- Selected / Student Yellow-Dot Inspector Card -->
+          <div id="drillCoordCard" class="card drill-coord-card">
+            <div class="row drill-inspector-head">
+              <div>
+                <span class="sub" id="drillDotOwnerLabel">YOUR YELLOW DOT</span>
+                <h3 id="drillDotName" class="card-title">No dot assigned yet</h3>
+              </div>
+              <div id="drillDotAssignControls" class="drill-assign-grid hidden">
+                <input id="drillDotLabelInput" type="text" placeholder="Dot # (e.g. AS1)" class="drill-small-text">
+                <select id="drillDotSectionSelect" class="select-sm">
+                  <option value="Woodwinds">Woodwinds</option>
+                  <option value="Brass">Brass</option>
+                  <option value="Percussion">Percussion</option>
+                  <option value="Color Guard">Color Guard</option>
+                  <option value="Leadership">Leadership</option>
+                </select>
+                <select id="drillAssignSelect" class="select-sm" aria-label="Assign Marcher"></select>
+              </div>
+            </div>
+            <p id="drillCoordText" class="drill-coord-readout">Select a dot or ask your director to place the roster.</p>
+            <div class="row drill-step-metrics">
+              <span id="drillStepSizeText" class="chip">Step Size: Hold</span>
+              <span id="drillSelectionCountText" class="sub"></span>
+            </div>
+            <p id="drillSetNoteDisplay" class="sub"></p>
+          </div>
+        </section>
 <!--ADD ABOOVE THIS LINE-->
 
       </main>

@@ -10,15 +10,17 @@ import * as attendance from "./attendance.js";
 import * as chat from "./chat.js";
 import * as roster from "./roster.js";
 import { initTuner } from "./tuner.js";
-import { initMusic, stopMusic } from "./music.js"; // <-- ADDED MUSIC IMPORT
+import { initMusic, stopMusic } from "./music.js";
+import { initDrill, loadDrill, stopDrill } from "./drill.js";
 
 const TABS = [
   { id: "home", label: "Home", icon: "home" },
   { id: "goals", label: "Goals", icon: "target" },
-  { id: "passoffs", label: "Pass-offs", icon: "check" },
+  { id: "passoffs", label: "Music Checks", icon: "check" },
   { id: "attendance", label: "Attendance", icon: "calendar" },
   { id: "tuner", label: "Tuner", icon: "target" },
-  { id: "music", label: "Practice", icon: "play" }, // <-- ADDED MUSIC TAB
+  { id: "music", label: "Practice", icon: "play" },
+  { id: "drill", label: "Drill", icon: "target" },
   { id: "chat", label: "Chat", icon: "chat" },
   { id: "roster", label: "Roster", icon: "users", hide: () => state.me.role === "member" },
 ];
@@ -50,10 +52,13 @@ function buildNav() {
 
 function go(tab) {
   if (!visibleTabs().some((t) => t.id === tab)) tab = "home";
-  
-  // <-- ADDED: Stop the music if the user leaves the Practice tab
+
+  // Stop active playback/animations when leaving Practice or Drill
   if (state.tab === "music" && tab !== "music") {
     if (typeof stopMusic === "function") stopMusic();
+  }
+  if (state.tab === "drill" && tab !== "drill") {
+    if (typeof stopDrill === "function") stopDrill();
   }
 
   state.tab = tab;
@@ -61,12 +66,22 @@ function go(tab) {
   document.querySelectorAll(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
   history.replaceState(null, "", "#" + tab);
   $("main").scrollTo(0, 0);
+
   if (tab === "chat") chat.onShow();
+  if (tab === "drill") loadDrill();
 }
 
 /* ---------- Loading ---------- */
 const loadAll = () =>
-  Promise.all([goals.load(), passoffs.load(), attendance.load(), chat.load(), roster.load(), home.load()]);
+  Promise.all([
+    goals.load(),
+    passoffs.load(),
+    attendance.load(),
+    chat.load(),
+    roster.load(),
+    home.load(),
+    loadDrill(),
+  ]);
 
 const resync = debounce(async () => {
   if (!state.me) return;
@@ -95,7 +110,8 @@ async function start() {
     buildNav();
     [home, goals, passoffs, attendance, chat, roster].forEach((m) => m.init());
     initTuner();
-    initMusic(); // <-- ADDED MUSIC INIT
+    initMusic();
+    initDrill();
   }
 
   showScreen("app");
@@ -119,6 +135,7 @@ async function refresh() {
 const reloadGoals = debounce(() => goals.load(), 300);
 const reloadPass = debounce(() => passoffs.load(), 300);
 const reloadAtt = debounce(() => { attendance.load(); home.load(); }, 300);
+const reloadDrill = debounce(() => { if (state.tab === "drill") loadDrill(); }, 400);
 const reloadUsers = debounce(async () => {
   await loadRoster();
   const mine = state.byId.get(state.me.id);
@@ -136,6 +153,8 @@ function subscribe() {
     on("pass_off_items", reloadPass),
     on("student_pass_offs", reloadPass),
     on("attendance_logs", reloadAtt),
+    on("drill_shows", reloadDrill),
+    on("drill_sets", reloadDrill),
     on("users", reloadUsers),
   ];
   sync = db.channel("band-sync");

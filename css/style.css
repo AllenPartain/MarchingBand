@@ -757,3 +757,214 @@ details.item summary::-webkit-details-marker { display: none; }
   font-size: 1.1rem;
   color: #f8fafc;
 }
+/* DRILL DESIGNER & STUDENT YELLOW-DOT STUDIO */
+.drill-studio-bar,
+.drill-set-bar,
+.drill-canvas-wrap,
+.drill-coord-card {
+  margin-bottom: 0.9rem;
+}
+
+.drill-bar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.drill-palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.drill-tool-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tool-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.38rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tool-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tool-btn.active {
+  background: #2563eb;
+  border-color: #60a5fa;
+  color: #ffffff;
+}
+
+.drill-inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.drill-num-input {
+  width: 62px !important;
+  padding: 0.32rem 0.4rem !important;
+  text-align: center;
+}
+
+.drill-label-input {
+  width: 92px !important;
+  padding: 0.32rem 0.5rem !important;
+}
+
+.drill-small-text {
+  width: 96px !important;
+  padding: 0.35rem 0.5rem !important;
+}
+
+.drill-set-strip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.drill-set-strip {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  flex: 1;
+}
+
+.drill-set-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.drill-set-meta-row input[type="text"]:last-child {
+  flex: 1;
+  min-width: 180px;
+}
+
+.drill-canvas-wrap {
+  padding: 0.75rem;
+}
+
+.drill-canvas-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+.drill-bottom-hud {
+  margin-top: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+#drillCanvas {
+  width: 100%;
+  aspect-ratio: 160 / 85.33;
+  display: block;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.drill-transport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.drill-scrubber-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 220px;
+}
+
+#drillScrubber {
+  flex: 1;
+  accent-color: #facc15;
+  cursor: pointer;
+}
+
+.drill-coord-card {
+  border-left: 4px solid #facc15;
+}
+
+.drill-inspector-head {
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.drill-assign-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.drill-coord-readout {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #facc15;
+  margin: 0.4rem 0;
+}
+
+.drill-step-metrics {
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.dotbook-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.dotbook-table th,
+.dotbook-table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.dotbook-table th {
+  color: #facc15;
+  font-weight: 700;
+}
+
+#drillHeatmapBtn.active {
+  background: #f59e0b;
+  color: #0a0f1a;
+  font-weight: 700;
+}
