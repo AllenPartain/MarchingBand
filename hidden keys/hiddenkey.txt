@@ -1,2 +1,2 @@
-supabase.com Password 
-n73v3VD$eBk.356
+supabase.com Pa_MD4_ssword 
+aa3e0538a8ef4b5dc2bb0474a118d930
